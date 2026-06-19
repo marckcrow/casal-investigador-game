@@ -10,7 +10,8 @@ export default function Solo() {
   const [filter, setFilter] = useState('Todos')
   const [selectedCase, setSelectedCase] = useState(null)
 
-  const filtered = cases.filter(c => filter === 'Todos' || c.theme === filter)
+  const allCases = cases.cases || cases
+  const filtered = Array.isArray(allCases) ? allCases.filter(c => filter === 'Todos' || c.theme === filter) : []
 
   const startGame = (c) => {
     navigate(`/jogo/${c.id}`)

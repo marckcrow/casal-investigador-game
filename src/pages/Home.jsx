@@ -14,11 +14,12 @@ export default function Home() {
   const [audioOn, setAudioOn] = useState(false)
   const [showModal, setShowModal] = useState(null)
 
-  const filtered = cases.filter(c =>
+  const allCases = cases.cases || cases
+  const filtered = Array.isArray(allCases) ? allCases.filter(c =>
     (filter === 'Todos' || c.theme === filter) &&
     (c.title.toLowerCase().includes(search.toLowerCase()) ||
      c.location.toLowerCase().includes(search.toLowerCase()))
-  )
+  ) : []
 
   const toggleAudio = () => {
     if (audioOn) { stopAmbient(); setAudioOn(false) }
@@ -39,7 +40,10 @@ export default function Home() {
               {audioOn ? '🔊' : '🔇'} Som
             </button>
             <Link to="/jogar" className="btn-primary text-sm px-4 py-2">
-              🎮 Modo Solo
+              🎮 Solo
+            </Link>
+            <Link to="/multiplayer" className="btn-outline text-sm px-4 py-2">
+              👥 Multiplayer
             </Link>
           </div>
         </div>

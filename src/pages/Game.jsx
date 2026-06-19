@@ -20,7 +20,8 @@ const STEPS = ['intro', 'character', 'case', 'clues', 'suspects', 'vote', 'resul
 export default function Game() {
   const { caseId } = useParams()
   const navigate = useNavigate()
-  const caseData = cases.find(c => String(c.id) === String(caseId)) || cases[0]
+  const allCases = cases.cases || cases
+  const caseData = Array.isArray(allCases) ? allCases.find(c => String(c.id) === String(caseId)) : (allCases.cases?.find(c => String(c.id) === String(caseId)) || allCases.cases?.[0])
   const gameRef = useRef(null)
   const [step, setStep] = useState('intro')
   const [selectedChar, setSelectedChar] = useState(null)

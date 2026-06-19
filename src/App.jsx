@@ -1,19 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import Game from './pages/Game'
 import Solo from './pages/Solo'
-import './index.css'
+import Game from './pages/Game'
+import Multiplayer from './pages/Multiplayer'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-noir text-paper">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/jogar" element={<Solo />} />
-          <Route path="/jogo/:caseId" element={<Game />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/jogar" element={<Solo />} />
+        <Route path="/jogo/:caseId" element={<Game />} />
+        <Route path="/multiplayer" element={<Multiplayer />} />
+      </Routes>
     </BrowserRouter>
   )
 }

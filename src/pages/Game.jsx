@@ -310,7 +310,7 @@ export default function Game() {
                       </div>
                     )}
                   </div>
-                  {selectedSuspect === s && (
+                  {selectedSuspect === s.name && (
                     <span className="text-gold text-xl">✓</span>
                   )}
                 </div>

@@ -49,7 +49,7 @@ export default function Game() {
       if (targetStep === 'clues') playSiren()
       if (targetStep === 'vote') playVoteLock()
       if (targetStep === 'result') {
-        const correct = selectedSuspect === caseData.suspects[0]
+        const correct = selectedSuspect === caseData.suspects[0].name
         setResult(correct ? 'correct' : 'wrong')
         if (correct) playVictory()
         else playDramaticSting()
@@ -207,7 +207,7 @@ export default function Game() {
                 </div>
                 {selectedChar?.id === 'criminal' && (
                   <div className="mt-3 bg-crimson/10 border border-crimson/30 rounded p-3 text-xs text-paperDim">
-                    🎭 Lembre-se: você é o criminoso. Jogue a culpa em {caseData.suspects[1] || 'outro'} ou {caseData.suspects[2] || 'outro'}.
+                    🎭 Lembre-se: você é o criminoso. Jogue a culpa em {caseData.suspects[1] ? caseData.suspects[1].name : 'outro'} ou {caseData.suspects[2] ? caseData.suspects[2].name : 'outro'}.
                   </div>
                 )}
               </div>
@@ -229,8 +229,8 @@ export default function Game() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               {[
-                { idx: 0, label: '📁 LAUDO PERICIAL', text: `Análise técnica do local em ${caseData.location}. vestígios indicam contato físico entre a vítima e ${caseData.suspects[0]}.` },
-                { idx: 1, label: '📁 REGISTRO DE CHAMADAS', text: `Celular da vítima: última chamada às 23h47 para ${caseData.suspects[1] || 'um número desconhecido'}. Nenhuma resposta.` },
+                { idx: 0, label: '📁 LAUDO PERICIAL', text: `Análise técnica do local em ${caseData.location}. vestígios indicam contato físico entre a vítima e ${caseData.suspects[0].name}.` },
+                { idx: 1, label: '📁 REGISTRO DE CHAMADAS', text: `Celular da vítima: última chamada às 23h47 para ${caseData.suspects[1] ? caseData.suspects[1].name : 'um número desconhecido'}. Nenhuma resposta.` },
                 { idx: 2, label: '📁 DEPOIMENTO INICIAL', text: `"Vi alguém sair correndo do prédio por volta das 23h. Usava boné escuro." — Vizinho anônimo.` },
               ].map(clue => (
                 <div key={clue.idx}>
@@ -257,7 +257,7 @@ export default function Game() {
             <div className="bg-noir2 border border-gray-700 rounded-lg p-4 mb-6">
               <div className="text-paperDim text-xs font-typewriter mb-2">⚠️ INFORMAÇÕES CONFLITANTES</div>
               <p className="text-paperDim text-xs italic">
-                A investigação inicial apontou para {caseData.suspects[1] || 'outro suspeito'}, mas os detalhes não batem. Há algo errado com esse testemunho.
+                A investigação inicial apontou para {caseData.suspects[1] ? caseData.suspects[1].name : 'outro suspeito'}, mas os detalhes não batem. Há algo errado com esse testemunho.
               </p>
             </div>
 
@@ -285,16 +285,16 @@ export default function Game() {
               {caseData.suspects.map((s, i) => (
                 <div
                   key={i}
-                  onClick={() => setSelectedSuspect(s)}
+                  onClick={() => setSelectedSuspect(s.name)}
                   className={`case-file flex items-center gap-4 p-4 cursor-pointer transition-all ${
-                    selectedSuspect === s ? 'border-gold shadow-lg shadow-gold/10' : 'hover:border-gray-600'
+                    selectedSuspect === s.name ? 'border-gold shadow-lg shadow-gold/10' : 'hover:border-gray-600'
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-typewriter ${
-                    selectedSuspect === s ? 'bg-gold text-noir' : 'bg-noir border border-gray-600 text-paperDim'
+                    selectedSuspect === s.name ? 'bg-gold text-noir' : 'bg-noir border border-gray-600 text-paperDim'
                   }`}>{i + 1}</div>
                   <div className="flex-1">
-                    <div className="text-paper text-sm font-typewriter">{s}</div>
+                    <div className="text-paper text-sm font-typewriter">{s.name}</div>
                     {i === criminalIdx && (
                       <div className="text-xs text-paperDim italic mt-1">
                         {selectedChar?.id === 'criminal'
@@ -358,7 +358,7 @@ export default function Game() {
                   CASO RESOLVIDO!
                 </h2>
                 <p className="text-paper text-lg mb-2">
-                  Você identificou corretamente: <span className="text-green-400 font-typewriter">{caseData.suspects[0]}</span>
+                  Você identificou corretamente: <span className="text-green-400 font-typewriter">{caseData.suspects[0].name}</span>
                 </p>
                 <div className="case-file p-5 mb-6 max-w-md mx-auto text-left">
                   <div className="text-xs font-typewriter text-gold mb-2">// SOLUÇÃO DO CASO</div>
@@ -376,7 +376,7 @@ export default function Game() {
                   CRIMINOSO ESCAPOU!
                 </h2>
                 <p className="text-paper text-lg mb-2">
-                  O verdadeiro criminoso era: <span className="text-crimson font-typewriter">{caseData.suspects[0]}</span>
+                  O verdadeiro criminoso era: <span className="text-crimson font-typewriter">{caseData.suspects[0].name}</span>
                 </p>
                 <p className="text-paperDim mb-2">Você acusou: {selectedSuspect}</p>
                 <div className="case-file p-5 mb-6 max-w-md mx-auto text-left">

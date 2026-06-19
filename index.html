@@ -14,7 +14,21 @@
     <link rel="manifest" href="/manifest.json" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#c9a84c;font-family:monospace;font-size:14px;flex-direction:column;gap:12px">
+        <span style="font-size:40px">🕵️</span>
+        <span>Carregando Casal Investigador...</span>
+        <span style="color:#666;font-size:11px" id="err-msg"></span>
+      </div>
+    </div>
+    <script>
+      window.onerror = function(msg, src, line, col, err) {
+        var el = document.getElementById('err-msg')
+        if (el) el.textContent = 'Erro: ' + msg + ' (linha ' + line + ')'
+        console.error('[Global error]', msg, src, line, err)
+        return false
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

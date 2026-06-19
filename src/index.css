@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a;
+    color: #e8e0d0;
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 3px; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-crimson text-white font-typewriter tracking-widest px-6 py-3 rounded cursor-pointer border-0 transition-all duration-200 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  .btn-gold {
+    @apply bg-gold text-noir font-typewriter tracking-widest px-6 py-3 rounded cursor-pointer border-0 transition-all duration-200 hover:bg-yellow-400 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+  .btn-outline {
+    @apply bg-transparent border border-gold text-gold font-typewriter tracking-widest px-6 py-3 rounded cursor-pointer transition-all duration-200 hover:bg-gold hover:text-noir;
+  }
+  .card {
+    @apply bg-noir2 border border-gray-800 rounded-lg overflow-hidden transition-all duration-300;
+  }
+  .card:hover {
+    @apply border-gold shadow-lg shadow-gold/10 -translate-y-1;
+  }
+  .theme-badge {
+    @apply text-xs font-typewriter tracking-widest px-2 py-0.5 rounded uppercase;
+  }
+  .theme-CRIME { background: #c41e3a22; color: #ff6b6b; border: 1px solid #c41e3a44; }
+  .theme-HORROR { background: #4a008022; color: #9b59b6; border: 1px solid #4a008044; }
+  .theme-OCULTISMO { background: #2d004d22; color: #9b59b6; border: 1px solid #8e44ad44; }
+  .theme-MISTÉRIO { background: #003d5b22; color: #5dade2; border: 1px solid #003d5b44; }
+  .theme-SUSPENSE { background: #5b3a0022; color: #f39c12; border: 1px solid #5b3a0044; }
+
+  /* Phaser game canvas container */
+  #game-container canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+}
+
+/* Animations */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes stampReveal {
+  0% { transform: scale(3) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(-3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-5deg); opacity: 1; }
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(201, 168, 76, 0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.animate-fade-in { animation: fadeSlideIn 0.5s ease-out forwards; }
+.animate-stamp { animation: stampReveal 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.2) forwards; }
+.animate-pulse-gold { animation: pulse-gold 2s infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* Typewriter text */
+.typewriter-text {
+  overflow: hidden;
+  border-right: 2px solid #c9a84c;
+  white-space: nowrap;
+  animation: typewriter 2s steps(40) forwards;
+}
+
+/* Crime scene overlay */
+.crime-scene-overlay {
+  position: relative;
+}
+.crime-scene-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Case file folder */
+.case-file {
+  background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+  border: 1px solid #333;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.case-file::before {
+  content: 'DOSSIÊ';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: #c9a84c;
+  color: #0a0a0a;
+  font-family: 'Special Elite', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  padding: 2px 10px;
+  border-radius: 2px;
+}

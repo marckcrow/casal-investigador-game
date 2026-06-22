@@ -213,7 +213,7 @@ export default function Multiplayer() {
 
 function LandingView({ createRoom, joinRoom, playerName, setPlayerName, joinCode, setJoinCode, selectedCaseId, setSelectedCaseId, error, setError }) {
   const [tab, setTab] = useState('create')
-  const shuffled = useRef([...cases].sort(() => Math.random() - 0.5).slice(0, 10))
+  const shuffled = useRef([...(cases.cases || cases)].sort(() => Math.random() - 0.5).slice(0, 10))
 
   return (
     <div className="min-h-screen bg-noir">
@@ -444,7 +444,7 @@ function GameView({ caseData, myChar, players, phase, phaseLabel, votedCount, to
         )}
 
         {/* Case intro */}
-        {caseData && phase === 'case' || phase === 'character' ? (
+        {(caseData && (phase === 'case' || phase === 'character')) ? (
           <div className="case-file p-6 mb-6">
             <div className="text-xs font-typewriter text-gold tracking-widest mb-2">// CASO #{String(caseData.id || '').padStart(2,'0')}</div>
             <h2 className="font-typewriter text-gold text-lg mb-2">{caseData.title}</h2>

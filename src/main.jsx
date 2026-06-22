@@ -3,6 +3,56 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+// ── Global Error Tracker ──────────────────────────────────────────────────
+// Logs errors to localStorage for Admin panel review
+const ERROR_LOG_KEY = 'mp_error_log'
+const MAX_ERRORS = 100
+
+window.__ErrorTracker = {
+  log(error, context = '') {
+    try {
+      const entry = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        message: error?.message || String(error),
+        stack: error?.stack || '',
+        context: context || window.location.pathname,
+        url: window.location.href,
+        userAgent: navigator.userAgent.slice(0, 120),
+        timestamp: new Date().toISOString(),
+      }
+      const raw = localStorage.getItem(ERROR_LOG_KEY)
+      const log = raw ? JSON.parse(raw) : []
+      log.unshift(entry)
+      if (log.length > MAX_ERRORS) log.length = MAX_ERRORS
+      localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log))
+    } catch { /* storage full or unavailable */ }
+  },
+  getErrors() {
+    try {
+      return JSON.parse(localStorage.getItem(ERROR_LOG_KEY)) || []
+    } catch { return [] }
+  },
+  clearErrors() {
+    localStorage.removeItem(ERROR_LOG_KEY)
+  },
+}
+
+// Override window.onerror to capture all runtime errors
+const _origOnError = window.onerror
+window.onerror = function(msg, src, line, col, err) {
+  window.__ErrorTracker.log(err || msg, `${src}:${line}:${col}`)
+  // Also show on screen (existing behavior)
+  var el = document.getElementById('err-msg')
+  if (el) el.textContent = 'Erro: ' + msg + ' (linha ' + line + ')'
+  console.error('[Global error]', msg, src, line, col, err)
+  if (_origOnError) return _origOnError.apply(this, arguments)
+}
+
+// Capture unhandled promise rejections
+window.addEventListener('unhandledrejection', function(e) {
+  window.__ErrorTracker.log(e.reason, 'Unhandled Promise Rejection')
+})
+
 // Error boundary to catch render errors
 class ErrorBoundary extends React.Component {
   constructor(props) {

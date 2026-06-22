@@ -10,6 +10,7 @@ const ADMIN_STATS_KEY = 'mp_admin_stats'
 
 const TABS = [
   { id: 'visao', label: '📊 Visão Geral', icon: '📊' },
+  { id: 'erros', label: '🐛 Erros', icon: '🐛' },
   { id: 'jogadores', label: '👥 Jogadores', icon: '👥' },
   { id: 'casos', label: '📁 Casos', icon: '📁' },
   { id: 'ranking', label: '🏆 Ranking', icon: '🏆' },
@@ -61,6 +62,7 @@ export default function Admin() {
   const [searchUsers, setSearchUsers] = useState('')
   const [searchCases, setSearchCases] = useState('')
   const [notification, setNotification] = useState(null)
+  const [errorLog, setErrorLog] = useState([])
 
   const allCases = cases.cases || cases
 
@@ -93,7 +95,22 @@ export default function Admin() {
     const next = !maintenanceMode
     setMaintenanceMode(next)
     localStorage.setItem(MAINTENANCE_KEY, String(next))
-    showNotif(next ? '🔒 Modo manutenção ATIVADO' : '✅ Modo manutenção DESATIVADO')
+    showNotif(next ? '🔒 Modo manutenção ATIVADO' : '✅ Modo manutenção DESATIVADA')
+  }
+
+  // ── Error log management ────────────────────────────────────────────────
+  useEffect(() => {
+    if (activeTab === 'erros' && window.__ErrorTracker) {
+      setErrorLog(window.__ErrorTracker.getErrors())
+    }
+  }, [activeTab])
+
+  const clearErrors = () => {
+    if (window.__ErrorTracker) {
+      window.__ErrorTracker.clearErrors()
+      setErrorLog([])
+      showNotif('🗑️ Log de erros limpo!')
+    }
   }
 
   // ── Ranking data from localStorage ─────────────────────────────────────
@@ -246,6 +263,65 @@ export default function Admin() {
                 <div className="font-typewriter text-paper text-sm mb-1">Configurações</div>
                 <div className="text-paperDim text-xs">{maintenanceMode ? '🔒 Manutenção ON' : '✅ Online'}</div>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: ERROS (Error Log) ──────────────────────────────────── */}
+        {activeTab === 'erros' && (
+          <div className="animate-fade-in space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-typewriter text-crimson text-lg tracking-widest">🐛 LOG DE ERROS</h2>
+              <div className="flex gap-2">
+                <span className="text-paperDim text-xs">{errorLog.length} erro(s) registrado(s)</span>
+                {errorLog.length > 0 && (
+                  <button
+                    onClick={clearErrors}
+                    className="text-xs bg-crimson/20 border border-crimson/30 text-crimson px-3 py-1.5 rounded hover:bg-crimson/30 transition-all font-typewriter"
+                  >
+                    🗑️ Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {errorLog.length === 0 ? (
+              <div className="bg-noir2 border border-gray-800 rounded-xl p-12 text-center">
+                <div className="text-4xl mb-3">✅</div>
+                <p className="text-paper text-sm mb-1">Nenhum erro registrado!</p>
+                <p className="text-paperDim text-xs">Os erros de runtime aparecerão aqui automaticamente.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {errorLog.map((err, i) => (
+                  <div key={err.id || i} className="bg-noir2 border border-gray-800 rounded-lg p-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-crimson text-sm font-mono break-all">{err.message}</div>
+                        <div className="text-paperDim text-xs mt-1 font-mono">📍 {err.context || err.url}</div>
+                      </div>
+                      <div className="text-paperDim/50 text-[10px] whitespace-nowrap">
+                        {new Date(err.timestamp).toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+                    {err.stack && (
+                      <details className="mt-2">
+                        <summary className="text-paperDim/60 text-xs cursor-pointer hover:text-gold transition-colors">Stack trace ▾</summary>
+                        <pre className="text-paperDim/40 text-[10px] mt-2 overflow-auto max-h-32 font-mono leading-relaxed whitespace-pre-wrap">{err.stack}</pre>
+                      </details>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="bg-gold/5 border border-gold/20 rounded-lg p-4">
+              <p className="text-paperDim text-xs leading-relaxed">
+                📝 <strong>Como funciona:</strong> O tracker captura automaticamente erros de JavaScript
+                (window.onerror, promessas rejeitadas, erros de render). Cada erro é salvo no localStorage
+                do navegador. Para ver erros de outros usuários, integre com Supabase ou um serviço
+                de error tracking (Sentry, LogRocket).
+              </p>
             </div>
           </div>
         )}

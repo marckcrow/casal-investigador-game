@@ -17,8 +17,29 @@ const CHARACTERS = [
   { id: 'family', emoji: '💔', name: 'Família', color: '#9b59b6', desc: 'Você conhecia a vítima profundamente.' },
 ]
 
-// ── Mock data store (in-memory, works without server) ───────────────────
-const mockRooms = new Map()
+// ── Mock data store (localStorage-persisted, works across tabs) ────────────
+const MP_STORAGE_KEY = 'mp_mock_rooms'
+
+function getMockRooms() {
+  try {
+    const raw = localStorage.getItem(MP_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+function saveMockRooms(rooms) {
+  try {
+    // Clean up rooms older than 2 hours
+    const cutoff = Date.now() - 2 * 60 * 60 * 1000
+    const cleaned = {}
+    for (const [code, room] of Object.entries(rooms)) {
+      if (new Date(room.createdAt).getTime() > cutoff) {
+        cleaned[code] = room
+      }
+    }
+    localStorage.setItem(MP_STORAGE_KEY, JSON.stringify(cleaned))
+  } catch {}
+}
 
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no confusing O/0/I/1
@@ -64,6 +85,9 @@ export default function Multiplayer() {
     return ''
   })
   const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState('create')
+  // Track if we have a pending deep-link join (code pre-filled from /sala/:code)
+  const pendingJoinCode = useRef(joinCode || '')
   const [toast, setToast] = useState(null) // { id, message, type }
   const [loading, setLoading] = useState(false)
   const audioStarted = useRef(false)
@@ -109,10 +133,31 @@ export default function Multiplayer() {
     return () => { try { s?.disconnect() } catch {} }
   }, [])
 
+  // ── Auto-join from deep link (/sala/:code) ───────────────────────────
+  useEffect(() => {
+    if (pendingJoinCode.current && pendingJoinCode.current.length >= 4) {
+      const code = pendingJoinCode.current
+      setActiveTab('join')
+      // If player already has a name saved, auto-join after a short delay
+      try {
+        const savedName = localStorage.getItem('mp_player_name')
+        if (savedName && savedName.trim()) {
+          setPlayerName(savedName.trim())
+          setTimeout(() => joinRoom(code, savedName.trim()), 600)
+        } else {
+          setActiveTab('join')
+        }
+      } catch {
+        setActiveTab('join')
+      }
+    }
+  }, [mockMode]) // re-run when mockMode is resolved
+
   // ── Actions ─────────────────────────────────────────────────────────────
   const createRoom = useCallback((name, caseId) => {
     setLoading(true)
     setError(null)
+    try { localStorage.setItem('mp_player_name', name) } catch {}
 
     if (mockMode || !socket) {
       // ── MOCK MODE: create room locally ──────────────────────────────
@@ -142,6 +187,7 @@ export default function Multiplayer() {
         }
 
         mockRooms.set(code, room)
+        saveMockRooms(getMockRooms()) // persist to localStorage
         setMyId(pid)
         setRoomId(code)
         setHostId(pid)
@@ -174,11 +220,13 @@ export default function Multiplayer() {
   const joinRoom = useCallback((code, name) => {
     setLoading(true)
     setError(null)
+    try { localStorage.setItem('mp_player_name', name) } catch {}
 
     if (mockMode || !socket) {
       // ── MOCK MODE: join local room ───────────────────────────────────
       setTimeout(() => {
-        const room = mockRooms.get(code.toUpperCase())
+        const rooms = getMockRooms()
+        const room = rooms[code.toUpperCase()]
         if (!room) {
           setLoading(false)
           setError('Sala não encontrada. Verifique o código e tente novamente.')
@@ -206,6 +254,8 @@ export default function Multiplayer() {
           joinedAt: new Date().toISOString(),
         }
         room.players.push(player)
+        rooms[code.toUpperCase()] = room
+        saveMockRooms(rooms) // persist updated room with new player
 
         setMyId(pid)
         setRoomId(code.toUpperCase())
@@ -365,6 +415,7 @@ export default function Multiplayer() {
     loading={loading}
     toast={toast}
     mockMode={mockMode}
+    initialTab={activeTab}
   />
 
   // ── Lobby ───────────────────────────────────────────────────────────────
@@ -430,9 +481,9 @@ export default function Multiplayer() {
 function LandingView({
   createRoom, joinRoom, playerName, setPlayerName,
   joinCode, setJoinCode, selectedCaseId, setSelectedCaseId,
-  error, setError, loading, toast, mockMode
+  error, setError, loading, toast, mockMode, initialTab
 }) {
-  const [tab, setTab] = useState('create')
+  const [tab, setTab] = useState(initialTab || 'create')
   const shuffled = useRef([...cases.cases || cases].sort(() => Math.random() - 0.5).slice(0, 10))
 
   return (

@@ -1,5 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+
+// Supabase client for analytics
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://pvvrkwikmduvpnldcktl.supabase.co'
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dnJrd2lrbWR1dnBubGRja3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NTk2MjQsImV4cCI6MjA5NzMzNTYyNH0.O7BSycYhxQeDQ-RK0EET0r5PyNwze7IwoR9vuoQH2tE'
+
+async function supabaseTrackPixView() {
+  try {
+    const ipHash = btoa(navigator.userAgent + new Date().toDateString()).slice(0, 32)
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pix_views`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        ip_hash: ipHash,
+        user_agent: navigator.userAgent.slice(0, 100),
+        referrer: document.referrer || '/'
+      })
+    })
+    return res.ok
+  } catch { return false }
+}
+
+async function supabaseGetPixCount() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pix_views?select=id`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    })
+    if (res.ok) {
+      const data = await res.json()
+      return Array.isArray(data) ? data.length : 0
+    }
+    return null
+  } catch { return null }
+}
 
 // Custom SVG icons for social media — noir/detective themed
 const LinkedInIcon = () => (
@@ -82,6 +123,8 @@ export default function Sobre() {
   const [activeTab, setActiveTab] = useState('como-jogar')
   const [qrCopied, setQrCopied] = useState(false)
   const [showPixKey, setShowPixKey] = useState(false)
+  const [pixViews, setPixViews] = useState(null) // null = loading, number = count, -1 = error/offline
+  const trackedRef = useRef(false)
 
   const copyPixKey = async () => {
     const pixKey = 'd20317c0-c755-408e-9579-0139a27aff3e'
@@ -101,6 +144,22 @@ export default function Sobre() {
       setTimeout(() => setQrCopied(false), 2000)
     }
   }
+
+  // Track PIX views whenever the "Apoie" tab is opened
+  useEffect(() => {
+    if (activeTab !== 'apoie') return
+    if (trackedRef.current) return // only track once per session
+    trackedRef.current = true
+
+    // Fire-and-forget: track + get count simultaneously
+    Promise.all([
+      supabaseTrackPixView(),
+      supabaseGetPixCount()
+    ]).then(([, count]) => {
+      if (count !== null) setPixViews(count)
+      else setPixViews(-1) // table doesn't exist yet
+    })
+  }, [activeTab])
 
   const tabs = [
     { id: 'como-jogar', label: '🎮 Como Jogar', icon: '🎮' },
@@ -410,6 +469,19 @@ export default function Sobre() {
                   <div className="flex justify-between text-sm">
                     <span className="text-paperDim">Chave:</span>
                     <span className="text-gold text-xs font-mono">Aleatória (UUID)</span>
+                  </div>
+                  {/* View counter badge */}
+                  <div className="flex justify-end pt-1">
+                    {pixViews === null ? (
+                      <span className="text-paperDim/40 text-xs animate-pulse">📡 conectando...</span>
+                    ) : pixViews === -1 ? (
+                      <span className="text-paperDim/40 text-xs">🔒 indicador indisponível</span>
+                    ) : (
+                      <span className="text-gold/70 text-xs flex items-center gap-1">
+                        <span>👁️</span>
+                        <span>{pixViews} {pixViews === 1 ? 'visualização' : 'visualizações'}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
 

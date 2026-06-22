@@ -31,6 +31,7 @@ export default function Game() {
   const [result, setResult] = useState(null) // 'correct' | 'wrong' | null
   const [audioVol, setAudioVol] = useState(0.5)
   const [typewriterDone, setTypewriterDone] = useState(false)
+  const [bgmOn, setBgmOn] = useState(true)
 
   // Start ambient on mount
   useEffect(() => {
@@ -104,6 +105,16 @@ export default function Game() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const isOn = window.toggleBgMusic && window.toggleBgMusic()
+                setBgmOn(isOn !== false)
+              }}
+              className="text-paperDim hover:text-gold transition-colors text-xs"
+              title="Música de fundo"
+            >
+              {bgmOn ? '🎵' : '🔇'}
+            </button>
             <span className="text-paperDim text-xs">🔊</span>
             <input type="range" min="0" max="1" step="0.1" value={audioVol}
               onChange={e => setAudioVol(parseFloat(e.target.value))}

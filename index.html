@@ -14,6 +14,37 @@
     <link rel="manifest" href="/manifest.json" />
   </head>
   <body>
+    <!-- YouTube Background Music: Gentleman Dark Blues -->
+    <div id="bg-music-container" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;pointer-events:none;z-index:-9999">
+      <iframe id="bg-music-yt" width="1" height="1" 
+        src="https://www.youtube.com/embed/e_fJKo19S1s?autoplay=1&loop=1&playlist=e_fJKo19S1s&mute=0&volume=30&controls=0&disablekb=1&playsinline=1&enablejsapi=1"
+        title="Background Music" 
+        allow="autoplay;encrypted-media" 
+        style="border:none">
+      </iframe>
+    </div>
+    <script>
+      // BG Music state
+      window.__bgMusic = { playing: true, volume: 0.3 };
+      function toggleBgMusic() {
+        var iframe = document.getElementById('bg-music-yt');
+        if (!iframe) return;
+        window.__bgMusic.playing = !window.__bgMusic.playing;
+        try {
+          // YouTube iframe API via postMessage
+          iframe.contentWindow.postMessage(
+            JSON.stringify({ event: 'command', func: window.__bgMusic.playing ? 'unMute' : 'setVolume', args: [window.__bgMusic.playing ? 30 : 0] }),
+            '*'
+          );
+          if (!window.__bgMusic.playing) {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pause', args: [] }), '*');
+          } else {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+          }
+        } catch(e) {}
+        return window.__bgMusic.playing;
+      }
+    </script>
     <div id="root">
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#c9a84c;font-family:monospace;font-size:14px;flex-direction:column;gap:12px">
         <span style="font-size:40px">🕵️</span>

@@ -13,6 +13,7 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [audioOn, setAudioOn] = useState(false)
   const [showModal, setShowModal] = useState(null)
+  const [bgmOn, setBgmOn] = useState(true)
 
   const allCases = cases.cases || cases
   const filtered = Array.isArray(allCases) ? allCases.filter(c =>
@@ -38,6 +39,12 @@ export default function Home() {
           <div className="flex gap-3">
             <button onClick={toggleAudio} className="btn-outline text-sm px-4 py-2">
               {audioOn ? '🔊' : '🔇'} Som
+            </button>
+            <button onClick={() => {
+              const isOn = window.toggleBgMusic && window.toggleBgMusic()
+              setBgmOn(isOn !== false)
+            }} className={`btn-outline text-sm px-4 py-2 ${bgmOn ? 'border-gold text-gold' : ''}`} title="Música de fundo (Dark Blues)">
+              🎵 Blues
             </button>
             <Link to="/jogar" className="btn-primary text-sm px-4 py-2">
               🎮 Solo

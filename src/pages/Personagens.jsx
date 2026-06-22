@@ -94,23 +94,23 @@ export default function Personagens() {
             {[
               {
                 phase: '📋 Coleta de Pistas',
-                rafael: 'Rafael cataloga cada evidência, verifica procedência e organiza cronologicamente.',
-                marina: 'Marina observa nuances: quem tocou em cada objeto, a postura de quem entregou a pista.',
+                marcondes: 'Marcondes cataloga cada evidência, verifica procedência e organiza cronologicamente.',
+                carla: 'Carla observa nuances: quem tocou em cada objeto, a postura de quem entregou a pista.',
               },
               {
                 phase: '🗣️ Interrogatório',
-                rafael: 'Rafael formula perguntas técnicas sobre locais, horários e documentos.',
-                marina: 'Marina lê a linguagem corporal e detecta contradições no discurso.',
+                marcondes: 'Marcondes formula perguntas técnicas sobre locais, horários e documentos.',
+                carla: 'Carla lê a linguagem corporal e detecta contradições no discurso.',
               },
               {
                 phase: '🔎 Análise',
-                rafael: 'Rafael cruza dados, verifica álibis e monta a linha do tempo dos fatos.',
-                marina: 'Marina identifica o elemento emocional — o "porquê" por trás de cada ação.',
+                marcondes: 'Marcondes cruza dados, verifica álibis e monta a linha do tempo dos fatos.',
+                carla: 'Carla identifica o elemento emocional — o "porquê" por trás de cada ação.',
               },
               {
                 phase: '⚖️ Acusação Final',
-                rafael: 'Rafael apresenta as evidências concretas que sustentam a acusação.',
-                marina: 'Marina adiciona a compreensão psicológica do comportamento do criminoso.',
+                marcondes: 'Marcondes apresenta as evidências concretas que sustentam a acusação.',
+                carla: 'Carla adiciona a compreensão psicológica do comportamento do criminoso.',
               },
             ].map(item => (
               <div key={item.phase} className="bg-noir2 border border-gray-800 rounded-lg p-5">
@@ -118,11 +118,11 @@ export default function Personagens() {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <span className="text-lg flex-shrink-0">🕵️‍♂️</span>
-                    <p className="text-paperDim text-xs leading-relaxed">{item.rafael}</p>
+                    <p className="text-paperDim text-xs leading-relaxed">{item.marcondes}</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-lg flex-shrink-0">🕵️‍♀️</span>
-                    <p className="text-paperDim text-xs leading-relaxed">{item.marina}</p>
+                    <p className="text-paperDim text-xs leading-relaxed">{item.carla}</p>
                   </div>
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function Personagens() {
         {/* CTA */}
         <div className="text-center p-8 bg-noir2 border border-gray-800 rounded-lg">
           <p className="text-paperDim text-sm mb-6">
-            Pronto para investigar ao lado de Rafael e Marina?
+            Pronto para investigar ao lado de Marcondes e Carla?
           </p>
           <Link
             to="/jogar"

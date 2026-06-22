@@ -47,6 +47,18 @@ export default function Game() {
   const [ttsEnabled, setTtsEnabled] = useState(false)
   const [imgError, setImgError] = useState({})
 
+  // Reset all game state for "Tentar Novamente"
+  const resetGame = useCallback(() => {
+    setStep('intro')
+    setSelectedChar(null)
+    setRevealedClues([])
+    setSelectedSuspect(null)
+    setVoteLocked(false)
+    setResult(null)
+    setTypewriterDone(false)
+    stopNarration()
+  }, [])
+
   const synthRef = useRef(window.speechSynthesis)
   const utteranceRef = useRef(null)
 
@@ -599,7 +611,12 @@ export default function Game() {
                   <p className="text-paper italic text-sm leading-relaxed">{caseData.solution}</p>
                 </div>
                 <div className="flex gap-4 justify-center flex-wrap">
-                  <Link to={`/jogo/${caseData.id}`} className="btn-primary">TENTAR NOVAMENTE</Link>
+                  <button
+                    onClick={() => { resetGame(); navigate(`/jogo/${caseData.id}`, { replace: true }) }}
+                    className="btn-primary"
+                  >
+                    TENTAR NOVAMENTE
+                  </button>
                   <Link to="/jogar" className="btn-outline">OUTRO CASO</Link>
                 </div>
               </>

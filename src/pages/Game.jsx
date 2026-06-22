@@ -121,7 +121,7 @@ export default function Game() {
     const currentIdx = STEPS.indexOf(step)
     if (idx > currentIdx) {
       if (targetStep === 'clues') playSiren?.()
-      if (targetStep === 'vote') playVoteLock?.()
+      if (targetStep === 'vote') playStamp?.()
       if (targetStep === 'result') {
         const correct = selectedSuspect === caseData.suspects[0].name
         setResult(correct ? 'correct' : 'wrong')
@@ -150,7 +150,7 @@ export default function Game() {
   const handleVote = () => {
     if (!selectedSuspect || voteLocked) return
     setVoteLocked(true)
-    playVoteLock?.()
+    playStamp?.()
     setTimeout(() => nextStep('result'), 1500)
   }
 
@@ -535,10 +535,10 @@ export default function Game() {
             <div className="flex justify-center gap-4 flex-wrap">
               <button
                 className="btn-primary disabled:opacity-30 text-lg px-10 py-4"
-                disabled={!selectedSuspect}
-                onClick={() => nextStep('vote')}
+                disabled={!selectedSuspect || voteLocked}
+                onClick={handleVote}
               >
-                CONFIRMAR VOTO →
+                {voteLocked ? 'PROCESSANDO...' : 'CONFIRMAR VOTO →'}
               </button>
             </div>
           </div>

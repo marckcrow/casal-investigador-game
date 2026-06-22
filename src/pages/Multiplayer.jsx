@@ -408,8 +408,8 @@ function GameView({ caseData, myChar, players, phase, phaseLabel, votedCount, to
   }
 
   const clues = [
-    { label: '📁 LAUDO PERICIAL', text: caseData ? `Vestígios indicam contato entre a vítima e ${caseData.suspects[0]}.` : '' },
-    { label: '📁 REGISTRO DE CHAMADAS', text: caseData ? `Última ligação às 23h47 para ${caseData.suspects[1] || 'número desconhecido'}.` : '' },
+    { label: '📁 LAUDO PERICIAL', text: caseData ? `Vestígios indicam contato entre a vítima e ${caseData.suspects[0].name}.` : '' },
+    { label: '📁 REGISTRO DE CHAMADAS', text: caseData ? `Última ligação às 23h47 para ${caseData.suspects[1] ? caseData.suspects[1].name : 'número desconhecido'}.` : '' },
     { label: '📁 DEPOIMENTO INICIAL', text: '"Vi alguém sair correndo do prédio. Usava boné escuro." — Vizinho.' },
   ]
 
@@ -502,7 +502,7 @@ function GameView({ caseData, myChar, players, phase, phaseLabel, votedCount, to
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-typewriter ${
                     selectedSuspect === i ? 'bg-gold text-noir' : 'bg-noir border border-gray-600 text-paperDim'
                   }`}>{i + 1}</div>
-                  <div className="flex-1 text-paper text-sm">{s}</div>
+                  <div className="flex-1 text-paper text-sm">{s.name}</div>
                   {selectedSuspect === i && <span className="text-gold text-lg">✓</span>}
                 </div>
               ))}

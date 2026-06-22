@@ -76,7 +76,7 @@ function generateEvidence(c) {
 
 function generateRedHerrings(c) {
   return [
-    `A primeira impressão indicava ${c.suspects[0]}, mas os detalhes não batiam.`,
+    `A primeira impressão indicava ${c.suspects[0].name}, mas os detalhes não batiam.`,
     `Vários vizinhos foram ouvidos, mas nenhum viu nada fora do comum àquela hora.`,
     `O celular da vítima tinha 3 chamadas não atendidas. Nenhuma delas do suspeito principal.`,
   ]
@@ -88,7 +88,7 @@ function generateCrimeSceneDescription(c) {
 
 function generateSolutionHighlight(c) {
   return {
-    criminal: c.suspects[0],
+    criminal: c.suspects[0].name,
     motive: c.solution.split('.')[0],
     evidence: c.solution,
   }

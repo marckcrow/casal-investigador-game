@@ -37,6 +37,15 @@ export default function Home() {
             <p className="text-paperDim text-sm">50 CASOS INTERATIVOS</p>
           </div>
           <div className="flex gap-3">
+            <Link to="/caderno" className="btn-outline text-sm px-3 py-2" title="Caderno de Investigação">
+              📓 Caderno
+            </Link>
+            <Link to="/ranking" className="btn-outline text-sm px-3 py-2" title="Ranking">
+              🏆 Ranking
+            </Link>
+            <Link to="/personagens" className="btn-outline text-sm px-3 py-2" title="Personagens">
+              👤 Personagens
+            </Link>
             <button onClick={toggleAudio} className="btn-outline text-sm px-4 py-2">
               {audioOn ? '🔊' : '🔇'} Som
             </button>
@@ -245,6 +254,9 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center">
         <div className="flex justify-center gap-4 mb-3 flex-wrap">
+          <Link to="/caderno" className="text-paperDim hover:text-gold transition-colors text-sm">📓 Caderno</Link>
+          <Link to="/ranking" className="text-paperDim hover:text-gold transition-colors text-sm">🏆 Ranking</Link>
+          <Link to="/personagens" className="text-paperDim hover:text-gold transition-colors text-sm">👤 Personagens</Link>
           <Link to="/sobre" className="text-paperDim hover:text-gold transition-colors text-sm">📖 Sobre o Projeto</Link>
           <a href="https://github.com/marckcrow/casal-investigador-game" target="__blank" rel="noopener noreferrer" className="text-paperDim hover:text-gold transition-colors text-sm">💻 GitHub</a>
           <a href="https://wa.me/5585985035473?text=Olá! Vi o Casal Investigador e quero conversar!" target="__blank" rel="noopener noreferrer" className="text-paperDim hover:text-gold transition-colors text-sm">💬 Contato</a>

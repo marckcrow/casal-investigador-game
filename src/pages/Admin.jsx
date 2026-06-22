@@ -49,7 +49,7 @@ function trackGamePlay() {
 
 export default function Admin() {
   const navigate = useNavigate()
-  const { user, isLoggedIn, logout } = useAuth()
+  const { user, isLoggedIn, logout, getAllUsers } = useAuth()
   const { progress } = useGameProgress()
 
   const [activeTab, setActiveTab] = useState('visao')
@@ -73,18 +73,9 @@ export default function Admin() {
 
   // ── Load users ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const { getAllUsers } = useAuth()
-    // Need to re-import to avoid hook-in-hook
-    try {
-      const raw = localStorage.getItem('mp_users')
-      const all = raw ? JSON.parse(raw) : []
-      setUsers(all.map(u => {
-        const clean = { ...u }
-        delete clean.password
-        return clean
-      }))
-    } catch { setUsers([]) }
-  }, [activeTab])
+    const all = getAllUsers()
+    setUsers(all)
+  }, [activeTab, getAllUsers])
 
   // ── Refresh stats ─────────────────────────────────────────────────────
   useEffect(() => {

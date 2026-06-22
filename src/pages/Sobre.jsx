@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 
 // Supabase client for analytics
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://pvvrkwikmduvpnldcktl.supabase.co'
@@ -115,9 +116,10 @@ const ShareIcon = () => (
   </svg>
 )
 
-// PIX QR Code as data URI (generated from key: d20317c0-c755-408e-9579-0139a27aff3e)
-// Using a placeholder approach — we'll embed the QR code image
-const PIX_QR_DATA = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=00020126580014br.gov.bcb.pix0136d20317c0-c755-408e-9579-0139a27aff3e5204000053039865405.005802BR5925JOSE%20MARCONDES%20RODRIGUES%20DA%20SILVA%20JUNIOR6009SAO%20PAULO62070505***6304E8C3`
+// PIX QR Code payload (BR Pix standard - EMV format)
+// Chave: d20317c0-c755-408e-9579-0139a27aff3e
+// Favorecido: JOSE MARCONDES RODRIGUES DA SILVA JUNIOR
+const PIX_PAYLOAD = '00020126580014br.gov.bcb.pix0136d20317c0-c755-408e-9579-0139a27aff3e5204000053039865405.005802BR5925JOSE%20MARCONDES%20RODRIGUES%20DA%20SILVA%20JUNIOR6009SAO%20PAULO62070505***6304E8C3'
 
 export default function Sobre() {
   const [activeTab, setActiveTab] = useState('como-jogar')
@@ -434,13 +436,15 @@ export default function Sobre() {
 
                 <p className="text-paperDim text-sm mb-4">Escaneie o QR Code para apoiar:</p>
 
-                {/* QR Code Image */}
+                {/* QR Code Image - Generated locally */}
                 <div className="bg-white p-4 rounded-lg inline-block mb-4 shadow-lg">
-                  <img
-                    src={PIX_QR_DATA}
-                    alt="QR Code PIX - Jose Marcondes Rodrigues da Silva Junior"
-                    className="w-56 h-56"
-                    loading="lazy"
+                  <QRCodeSVG
+                    value={PIX_PAYLOAD}
+                    size={224}
+                    level="H"
+                    bgColor="#FFFFFF"
+                    fgColor="#000000"
+                    includeMargin={true}
                   />
                 </div>
 

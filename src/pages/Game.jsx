@@ -198,7 +198,7 @@ export default function Game() {
                   {caseData.suspects.map((s, i) => (
                     <div key={i} className="bg-noir border border-gray-700 rounded px-3 py-2 text-sm text-paper flex items-center gap-2">
                       <span className="text-paperDim text-xs">{i + 1}.</span>
-                      {s}
+                      {s.name}
                       {selectedChar?.id === 'criminal' && i === criminalIdx && (
                         <span className="ml-auto text-crimson text-xs font-typewriter">VOCÊ</span>
                       )}

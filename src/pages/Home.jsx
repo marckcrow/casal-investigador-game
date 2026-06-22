@@ -164,7 +164,7 @@ export default function Home() {
                 <div className="flex gap-1 flex-wrap mb-3">
                   {c.suspects.map((s, si) => (
                     <span key={si} className="bg-noir border border-gray-700 text-paperDim text-xs px-1.5 py-0.5 rounded">
-                      {s}
+                      {s.name}
                     </span>
                   ))}
                 </div>
@@ -213,7 +213,7 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-2">
                 {showModal.suspects.map((s, si) => (
                   <div key={si} className="bg-noir border border-gray-700 rounded px-3 py-2 text-sm text-paper">
-                    👤 {s}
+                    👤 {s.name}
                   </div>
                 ))}
               </div>

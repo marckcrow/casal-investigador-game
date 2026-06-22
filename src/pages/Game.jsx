@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import cases from '../data/cases.json'
+import { startAmbient, stopAmbient, setAmbientVolume, playClick, playStamp, playDramaticSting, playVictory, playSiren } from '../lib/audio'
 
 const VOICE_SPEEDS = [
   { label: '0.7x', value: 0.7 },
@@ -109,11 +110,11 @@ export default function Game() {
   useEffect(() => () => { synthRef.current.cancel() }, [])
 
   useEffect(() => {
-    startAmbient?.('rain')
-    return () => { stopAmbient?.() }
+    startAmbient('rain')
+    return () => { stopAmbient() }
   }, [])
 
-  useEffect(() => { setAmbientVolume?.(audioVol) }, [audioVol])
+  useEffect(() => { setAmbientVolume(audioVol) }, [audioVol])
 
   const nextStep = useCallback((targetStep) => {
     const idx = STEPS.indexOf(targetStep)

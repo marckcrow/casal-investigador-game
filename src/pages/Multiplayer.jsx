@@ -19,6 +19,7 @@ const CHARACTERS = [
 
 // ── Mock data store (localStorage-persisted, works across tabs) ────────────
 const MP_STORAGE_KEY = 'mp_mock_rooms'
+const mockRooms = new Map()
 
 function getMockRooms() {
   try {

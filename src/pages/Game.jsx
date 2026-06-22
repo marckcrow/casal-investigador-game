@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import cases from '../data/cases.json'
-import {
-  startAmbient, stopAmbient, setAmbientVolume,
-  playTypewriter, playStamp, playSiren, playDramaticSting,
-  playClick, playVoteLock, playVictory
-} from '../lib/audio'
+
+const VOICE_SPEEDS = [
+  { label: '0.7x', value: 0.7 },
+  { label: '1x', value: 1.0 },
+  { label: '1.3x', value: 1.3 },
+  { label: '1.7x', value: 1.7 },
+]
 
 const CHARACTERS = [
   { id: 'detective', emoji: '🔍', name: 'Detetive', color: '#c9a84c', description: 'Você é o detetive principal. Use as pistas para identificar o criminoso.' },
@@ -21,39 +23,109 @@ export default function Game() {
   const { caseId } = useParams()
   const navigate = useNavigate()
   const allCases = cases.cases || cases
-  const caseData = Array.isArray(allCases) ? allCases.find(c => String(c.id) === String(caseId)) : (allCases.cases?.find(c => String(c.id) === String(caseId)) || allCases.cases?.[0])
+  const caseData = Array.isArray(allCases)
+    ? allCases.find(c => String(c.id) === String(caseId))
+    : (allCases.cases?.find(c => String(c.id) === String(caseId)) || allCases.cases?.[0])
+
   const gameRef = useRef(null)
   const [step, setStep] = useState('intro')
   const [selectedChar, setSelectedChar] = useState(null)
   const [revealedClues, setRevealedClues] = useState([])
   const [selectedSuspect, setSelectedSuspect] = useState(null)
   const [voteLocked, setVoteLocked] = useState(false)
-  const [result, setResult] = useState(null) // 'correct' | 'wrong' | null
+  const [result, setResult] = useState(null)
   const [audioVol, setAudioVol] = useState(0.5)
   const [typewriterDone, setTypewriterDone] = useState(false)
   const [bgmOn, setBgmOn] = useState(true)
 
-  // Start ambient on mount
+  // TTS State
+  const [availableVoices, setAvailableVoices] = useState([])
+  const [selectedVoice, setSelectedVoice] = useState(null)
+  const [narrationSpeed, setNarrationSpeed] = useState(1.0)
+  const [isNarrating, setIsNarrating] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(false)
+  const [imgError, setImgError] = useState({})
+
+  const synthRef = useRef(window.speechSynthesis)
+  const utteranceRef = useRef(null)
+
+  // Load available voices
   useEffect(() => {
-    startAmbient('rain')
-    return () => { stopAmbient() }
+    const loadVoices = () => {
+      const voices = synthRef.current.getVoices()
+      if (voices.length > 0) {
+        setAvailableVoices(voices)
+        // Prefer pt-BR voice, fallback to any Portuguese or default
+        const ptBr = voices.find(v => v.lang === 'pt-BR')
+        const pt = voices.find(v => v.lang.startsWith('pt'))
+        const en = voices.find(v => v.lang.startsWith('en'))
+        setSelectedVoice(ptBr || pt || en || voices[0])
+      }
+    }
+    loadVoices()
+    synthRef.current.onvoiceschanged = loadVoices
+    return () => { synthRef.current.cancel() }
   }, [])
 
+  const stopNarration = () => {
+    synthRef.current.cancel()
+    setIsNarrating(false)
+  }
+
+  const narrate = useCallback((text) => {
+    if (!ttsEnabled || !selectedVoice || !text) return
+    stopNarration()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.voice = selectedVoice
+    utterance.rate = narrationSpeed
+    utterance.pitch = 1
+    utterance.lang = 'pt-BR'
+    utterance.onstart = () => setIsNarrating(true)
+    utterance.onend = () => setIsNarrating(false)
+    utterance.onerror = () => setIsNarrating(false)
+    utteranceRef.current = utterance
+    synthRef.current.speak(utterance)
+  }, [ttsEnabled, selectedVoice, narrationSpeed])
+
+  // Narrate when step changes
   useEffect(() => {
-    setAmbientVolume(audioVol)
-  }, [audioVol])
+    if (!ttsEnabled) return
+    if (step === 'intro') {
+      narrate(`Caso número ${caseData.id}. ${caseData.title}. ${caseData.crime}`)
+    } else if (step === 'case') {
+      narrate(`Dossiê oficial. A vítima é ${caseData.victim}. ${caseData.crime}`)
+    } else if (step === 'clues') {
+      narrate('Colete as evidências. Clique nas pastas para revelar as pistas.')
+    } else if (step === 'suspects') {
+      narrate('Analise os suspeitos. Quem foi o criminoso? Selecione e confirme seu voto.')
+    } else if (step === 'result' && result === 'correct') {
+      narrate(`Parabéns! Caso resolvido! O criminoso era ${caseData.suspects[0].name}. ${caseData.solution}`)
+    } else if (step === 'result' && result === 'wrong') {
+      narrate(`Criminoso escapou! O verdadeiro criminoso era ${caseData.suspects[0].name}. ${caseData.solution}`)
+    }
+  }, [step, ttsEnabled, caseData, result, narrate])
+
+  // Cleanup on unmount
+  useEffect(() => () => { synthRef.current.cancel() }, [])
+
+  useEffect(() => {
+    startAmbient?.('rain')
+    return () => { stopAmbient?.() }
+  }, [])
+
+  useEffect(() => { setAmbientVolume?.(audioVol) }, [audioVol])
 
   const nextStep = useCallback((targetStep) => {
     const idx = STEPS.indexOf(targetStep)
     const currentIdx = STEPS.indexOf(step)
     if (idx > currentIdx) {
-      if (targetStep === 'clues') playSiren()
-      if (targetStep === 'vote') playVoteLock()
+      if (targetStep === 'clues') playSiren?.()
+      if (targetStep === 'vote') playVoteLock?.()
       if (targetStep === 'result') {
         const correct = selectedSuspect === caseData.suspects[0].name
         setResult(correct ? 'correct' : 'wrong')
-        if (correct) playVictory()
-        else playDramaticSting()
+        if (correct) playVictory?.()
+        else playDramaticSting?.()
       }
       setStep(targetStep)
     }
@@ -62,14 +134,22 @@ export default function Game() {
   const revealClue = (clueIdx) => {
     if (!revealedClues.includes(clueIdx)) {
       setRevealedClues([...revealedClues, clueIdx])
-      playTypewriter()
+      playTypewriter?.()
+      if (ttsEnabled) {
+        const clueTexts = [
+          'Laudo Pericial: Vestígios indicam contato entre a vítima e o primeiro suspeito.',
+          'Registro de Chamadas: A vítima ligou para o segundo sospechoso antes de morrer.',
+          'Depoimento: Um vizinho viu alguém fledendo da cena do crime.',
+        ]
+        narrate(clueTexts[clueIdx])
+      }
     }
   }
 
   const handleVote = () => {
     if (!selectedSuspect || voteLocked) return
     setVoteLocked(true)
-    playVoteLock()
+    playVoteLock?.()
     setTimeout(() => nextStep('result'), 1500)
   }
 
@@ -81,7 +161,7 @@ export default function Game() {
     const interval = setInterval(() => {
       if (i < text.length) {
         el.textContent += text[i]
-        playTypewriter()
+        playTypewriter?.()
         i++
       } else {
         clearInterval(interval)
@@ -91,34 +171,92 @@ export default function Game() {
     return () => clearInterval(interval)
   }
 
-  const criminalIdx = 0 // first suspect is always the criminal in data
+  const criminalIdx = 0
+
+  const handleImgError = (key) => {
+    setImgError(prev => ({ ...prev, [key]: true }))
+  }
+
+  const caseImg = !imgError[`intro-${caseData.id}`]
+    ? (caseData.imageUrl || `https://picsum.photos/seed/case${caseData.id}/800/450`)
+    : `https://picsum.photos/seed/case${caseData.id}/800/450`
+
+  const dossierImg = !imgError[`dossier-${caseData.id}`]
+    ? (caseData.dossierImageUrl || `https://picsum.photos/seed/dossier${caseData.id}/800/450`)
+    : `https://picsum.photos/seed/dossier${caseData.id}/800/450`
 
   return (
     <div className="min-h-screen bg-noir text-paper">
       {/* Header */}
       <header className="bg-noir2 border-b border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link to="/jogar" className="text-paperDim hover:text-gold transition-colors text-sm">← Casos</Link>
           <div className="flex-1 text-center">
             <span className="font-typewriter text-gold text-sm tracking-widest">
               CASO #{String(caseData.id).padStart(2, '0')} · {caseData.theme}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* TTS Controls */}
+          <div className="flex items-center gap-1">
+            {/* TTS Toggle */}
             <button
               onClick={() => {
-                const isOn = window.toggleBgMusic && window.toggleBgMusic()
-                setBgmOn(isOn !== false)
+                if (ttsEnabled) { stopNarration(); setTtsEnabled(false) }
+                else setTtsEnabled(true)
               }}
-              className="text-paperDim hover:text-gold transition-colors text-xs"
-              title="Música de fundo"
+              className={`text-xs px-2 py-1 rounded border transition-all ${ttsEnabled ? 'border-gold text-gold' : 'border-gray-700 text-paperDim hover:border-gray-500'}`}
+              title="Narrar caso com voz"
             >
-              {bgmOn ? '🎵' : '🔇'}
+              🎙️
             </button>
-            <span className="text-paperDim text-xs">🔊</span>
+
+            {/* Voice selector */}
+            {ttsEnabled && (
+              <>
+                {/* Play/Pause */}
+                <button
+                  onClick={() => isNarrating ? stopNarration() : narrate(caseData.crime)}
+                  className="text-xs px-2 py-1 rounded border border-gold text-gold hover:bg-gold/10 transition-all"
+                  title={isNarrating ? 'Parar' : 'Narrar'}
+                >
+                  {isNarrating ? '⏹' : '▶'}
+                </button>
+
+                {/* Speed */}
+                <select
+                  value={narrationSpeed}
+                  onChange={e => setNarrationSpeed(parseFloat(e.target.value))}
+                  className="bg-noir border border-gray-700 text-paperDim text-xs px-1 py-1 rounded outline-none cursor-pointer"
+                  title="Velocidade da voz"
+                >
+                  {VOICE_SPEEDS.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+
+                {/* Voice */}
+                <select
+                  value={selectedVoice?.name || ''}
+                  onChange={e => {
+                    const v = availableVoices.find(x => x.name === e.target.value)
+                    if (v) setSelectedVoice(v)
+                  }}
+                  className="bg-noir border border-gray-700 text-paperDim text-xs px-1 py-1 rounded outline-none cursor-pointer max-w-[100px] truncate"
+                  title="Voz da narração"
+                >
+                  {availableVoices.slice(0, 8).map(v => (
+                    <option key={v.name} value={v.name}>{v.name.split(' ')[0]}</option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            {/* Volume */}
+            <span className="text-paperDim text-xs ml-1">🔊</span>
             <input type="range" min="0" max="1" step="0.1" value={audioVol}
               onChange={e => setAudioVol(parseFloat(e.target.value))}
-              className="w-16 accent-gold" />
+              className="w-14 accent-gold" />
           </div>
         </div>
       </header>
@@ -128,15 +266,47 @@ export default function Game() {
         {/* STEP 0: INTRO */}
         {step === 'intro' && (
           <div className="text-center animate-fade-in">
-            <div className="text-6xl mb-6 animate-float">🕵️</div>
-            <h1 className="font-typewriter text-gold text-2xl mb-2 tracking-widest">{caseData.title}</h1>
-            <p className="text-paperDim mb-8">{caseData.location}</p>
-            <div className="case-file p-6 mb-8 text-left max-w-lg mx-auto">
-              <p className="text-paper italic leading-relaxed">{caseData.crime}</p>
+            {/* Case Image */}
+            <div className="relative rounded-xl overflow-hidden mb-6 max-w-lg mx-auto border border-gray-800 shadow-2xl">
+              <img
+                src={caseImg}
+                alt={caseData.title}
+                className="w-full h-56 object-cover"
+                onError={() => handleImgError(`intro-${caseData.id}`)}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-noir/90 via-noir/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-left">
+                <div className="text-4xl mb-1">🕵️</div>
+                <h1 className="font-typewriter text-gold text-xl leading-tight">{caseData.title}</h1>
+                <p className="text-paperDim text-sm">{caseData.location}</p>
+              </div>
+              {/* Theme badge */}
+              <div className="absolute top-3 right-3">
+                <span className={`theme-badge theme-${caseData.theme}`}>{caseData.theme}</span>
+              </div>
             </div>
-            <button className="btn-primary text-lg px-10 py-4 animate-pulse-gold" onClick={() => nextStep('character')}>
-              ASSUMIR ESTE CASO →
-            </button>
+
+            {/* Synopsis */}
+            <div className="case-file p-6 mb-6 max-w-lg mx-auto text-left">
+              <p className="text-paper italic leading-relaxed text-sm">{caseData.synopsis || caseData.crime}</p>
+            </div>
+
+            <div className="flex justify-center gap-4 flex-wrap">
+              <button
+                className="btn-primary text-lg px-8 py-3"
+                onClick={() => nextStep('character')}
+              >
+                ASSUMIR ESTE CASO →
+              </button>
+              {ttsEnabled && (
+                <button
+                  onClick={() => narrate(`${caseData.title}. ${caseData.synopsis || caseData.crime}`)}
+                  className="btn-outline text-lg px-6 py-3"
+                >
+                  {isNarrating ? '⏹ Parar' : '▶ Ouvir Narrativa'}
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -185,22 +355,35 @@ export default function Game() {
               </div>
             )}
 
-            <div className="case-file p-6 mb-6">
-              <div className="text-xs font-typewriter text-gold tracking-widest mb-4">// DOSSIÊ OFICIAL</div>
+            {/* Dossier Image */}
+            <div className="rounded-xl overflow-hidden mb-6 max-w-2xl mx-auto border border-gray-800 shadow-xl">
+              <img
+                src={dossierImg}
+                alt="Cena do crime"
+                className="w-full h-48 object-cover"
+                onError={() => handleImgError(`dossier-${caseData.id}`)}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-noir/80 to-transparent" />
+              <div className="relative bg-noir2/80 backdrop-blur px-6 py-3 border-t border-gray-800">
+                <span className="font-typewriter text-gold text-sm tracking-widest">📋 DOSSIÊ OFICIAL — CASO #{String(caseData.id).padStart(2, '0')}</span>
+              </div>
+            </div>
 
-              <div className="mb-4">
-                <div className="text-crimson font-typewriter text-xs mb-1">A VÍTIMA</div>
-                <p className="text-paper text-sm">{caseData.victim}</p>
+            <div className="case-file p-6 mb-6 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div className="text-crimson font-typewriter text-xs mb-1">A VÍTIMA</div>
+                  <p className="text-paper text-sm">{caseData.victim}</p>
+                </div>
+                <div>
+                  <div className="text-gold font-typewriter text-xs mb-1">LOCAL</div>
+                  <p className="text-paper text-sm">{caseData.location}</p>
+                </div>
               </div>
 
               <div className="mb-4">
                 <div className="text-crimson font-typewriter text-xs mb-1">O CRIME</div>
                 <p className="text-paper italic text-sm leading-relaxed">{caseData.crime}</p>
-              </div>
-
-              <div className="mb-4">
-                <div className="text-gold font-typewriter text-xs mb-1">LOCAL</div>
-                <p className="text-paper text-sm">{caseData.location}</p>
               </div>
 
               <div>
@@ -224,10 +407,18 @@ export default function Game() {
               </div>
             </div>
 
-            <div className="text-center">
+            <div className="flex justify-center gap-4 flex-wrap">
               <button className="btn-primary" onClick={() => nextStep('clues')}>
                 COLETAR EVIDÊNCIAS →
               </button>
+              {ttsEnabled && (
+                <button
+                  onClick={() => narrate(`Dossiê oficial. A vítima é ${caseData.victim}. ${caseData.crime}`)}
+                  className="btn-outline"
+                >
+                  {isNarrating ? '⏹ Parar Narração' : '▶ Ouvir Dossiê'}
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -272,7 +463,7 @@ export default function Game() {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="flex justify-center gap-4 flex-wrap">
               <button
                 className="btn-primary disabled:opacity-30"
                 disabled={revealedClues.length < 3}
@@ -328,7 +519,7 @@ export default function Game() {
               ))}
             </div>
 
-            <div className="text-center">
+            <div className="flex justify-center gap-4 flex-wrap">
               <button
                 className="btn-primary disabled:opacity-30 text-lg px-10 py-4"
                 disabled={!selectedSuspect}

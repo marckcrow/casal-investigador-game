@@ -8,6 +8,8 @@ import Sobre from './pages/Sobre'
 import Caderno from './pages/Caderno'
 import Ranking from './pages/Ranking'
 import Personagens from './pages/Personagens'
+import Login from './pages/Login'
+import Admin from './pages/Admin'
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
         <Route path="/caderno" element={<Caderno />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/personagens" element={<Personagens />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   )

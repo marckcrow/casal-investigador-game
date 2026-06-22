@@ -3,8 +3,10 @@ import RankingBoard from '../components/RankingBoard'
 import ProgressBar from '../components/ProgressBar'
 import { mockRanking, rankingStats, getRankTitle } from '../data/ranking'
 import { useGameProgress } from '../hooks/useGameProgress'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Ranking() {
+  const { user, isLoggedIn } = useAuth()
   const { progress, getLevelInfo } = useGameProgress()
   const levelInfo = getLevelInfo()
 
@@ -42,7 +44,15 @@ export default function Ranking() {
               🏆 RANKING
             </span>
           </div>
-          <div className="w-16" />
+          {isLoggedIn ? (
+            <Link to="/admin" className="text-paperDim hover:text-gold text-sm transition-colors">
+              ⚙️ Admin
+            </Link>
+          ) : (
+            <Link to="/login" className="text-paperDim hover:text-gold text-sm transition-colors">
+              🔑 Login
+            </Link>
+          )}
         </div>
       </header>
 
@@ -61,6 +71,21 @@ export default function Ranking() {
       </section>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Stats Summary */}
+        {/* Your rank (logged in) */}
+        {isLoggedIn && (
+          <div className="bg-gold/10 border border-gold/20 rounded-xl p-4 mb-6 text-center animate-fade-in">
+            <p className="text-paperDim text-xs font-typewriter tracking-widest mb-1">SEU RANK</p>
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl">{user.avatar}</span>
+              <div className="text-left">
+                <div className="font-typewriter text-gold text-lg">{user.name}</div>
+                <div className="text-paperDim text-xs">#{rankingStats.yourPosition} · {myEntry.score.toLocaleString('pt-BR')} pts · {levelInfo.title}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Summary */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[

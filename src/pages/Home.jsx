@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import cases from '../data/cases.json'
 import { startAmbient, stopAmbient } from '../lib/audio'
+import { useAuth } from '../hooks/useAuth'
 
 const THEMES = ['Todos', 'CRIME', 'HORROR', 'OCULTISMO', 'MISTÉRIO', 'SUSPENSE']
 const THEME_ICONS = { CRIME: '💀', HORROR: '👻', OCULTISMO: '🔮', 'MISTÉRIO': '🗝️', SUSPENSE: '⏱️' }
@@ -9,6 +10,7 @@ const DIFFICULTY_STARS = n => '★'.repeat(n) + '☆'.repeat(3 - n)
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user, isLoggedIn, logout } = useAuth()
   const [filter, setFilter] = useState('Todos')
   const [search, setSearch] = useState('')
   const [audioOn, setAudioOn] = useState(false)
@@ -36,7 +38,32 @@ export default function Home() {
             <h1 className="font-typewriter text-gold text-xl tracking-widest">CASAL INVESTIGADOR</h1>
             <p className="text-paperDim text-sm">50 CASOS INTERATIVOS</p>
           </div>
-          <div className="flex gap-3">
+          {/* User auth area */}
+          <div className="flex items-center gap-2">
+            {isLoggedIn ? (
+              <>
+                <div className="hidden sm:flex items-center gap-2 bg-noir/60 border border-gray-700 rounded-lg px-3 py-1.5">
+                  <span className="text-lg">{user.avatar}</span>
+                  <span className="text-paper text-sm font-typewriter">Olá, {user.name?.split(' ')[0]}! 🔍</span>
+                </div>
+                <Link to="/admin" className="btn-outline text-sm px-3 py-2" title="Painel Admin">
+                  ⚙️
+                </Link>
+                <button
+                  onClick={logout}
+                  className="btn-outline text-sm px-3 py-2 hover:border-crimson hover:text-crimson transition-colors"
+                  title="Sair da conta"
+                >
+                  🚪
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="btn-gold text-sm px-4 py-2 font-typewriter tracking-wider">
+                🔑 ENTRAR
+              </Link>
+            )}
+          </div>
+          <div className="hidden lg:flex gap-3">
             <Link to="/caderno" className="btn-outline text-sm px-3 py-2" title="Caderno de Investigação">
               📓 Caderno
             </Link>

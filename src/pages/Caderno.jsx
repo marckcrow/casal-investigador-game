@@ -6,6 +6,7 @@ import EmptyState from '../components/EmptyState'
 import { saveNotes, loadNotes, saveHypothesis, loadHypothesis, saveSuspectLevels, loadSuspectLevels, loadFoundClues } from '../utils/storage'
 import { sampleClues } from '../data/clues'
 import cases from '../data/cases.json'
+import { useAuth } from '../hooks/useAuth'
 
 const TABS = [
   { id: 'pistas', label: '🔍 Pistas', icon: '🔍' },
@@ -15,6 +16,7 @@ const TABS = [
 ]
 
 export default function Caderno() {
+  const { user, isLoggedIn } = useAuth()
   const [activeTab, setActiveTab] = useState('pistas')
   const [notes, setNotes] = useState('')
   const [hypothesis, setHypothesis] = useState('')
@@ -23,6 +25,12 @@ export default function Caderno() {
   const [selectedCaseId, setSelectedCaseId] = useState(null)
 
   const allCases = cases.cases || cases
+
+  // Build storage key with userId for per-user isolation
+  const storageKey = (base, caseId) => {
+    const prefix = isLoggedIn && user ? `mp_${user.id}_${base}_` : `cig_${base}_`
+    return `${prefix}${caseId}`
+  }
 
   // Load data for selected case
   useEffect(() => {
@@ -70,7 +78,17 @@ export default function Caderno() {
               📓 CADERNO DE INVESTIGAÇÃO
             </span>
           </div>
-          <div className="w-16" />
+          {isLoggedIn ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">{user.avatar}</span>
+              <span className="text-paperDim text-xs hidden sm:inline">{user.name?.split(' ')[0]}</span>
+              <span className="bg-gold/20 text-gold text-[10px] px-1.5 py-0.5 rounded border border-gold/30 font-typewriter">SALVO</span>
+            </div>
+          ) : (
+            <Link to="/login" className="text-paperDim hover:text-gold text-xs transition-colors">
+              🔑 Login
+            </Link>
+          )}
         </div>
       </header>
 

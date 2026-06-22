@@ -243,8 +243,13 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-8 text-center text-paperDim text-sm">
-        <p>Casal Investigador © 2026 · Jogo investigativo para casais e amigos</p>
+      <footer className="border-t border-gray-800 py-8 text-center">
+        <div className="flex justify-center gap-4 mb-3 flex-wrap">
+          <Link to="/sobre" className="text-paperDim hover:text-gold transition-colors text-sm">📖 Sobre o Projeto</Link>
+          <a href="https://github.com/marckcrow/casal-investigador-game" target="__blank" rel="noopener noreferrer" className="text-paperDim hover:text-gold transition-colors text-sm">💻 GitHub</a>
+          <a href="https://wa.me/5585985035473?text=Olá! Vi o Casal Investigador e quero conversar!" target="__blank" rel="noopener noreferrer" className="text-paperDim hover:text-gold transition-colors text-sm">💬 Contato</a>
+        </div>
+        <p className="text-paperDim/50 text-xs">Casal Investigador © 2026 · Feito com ❤️ por Marcondes Rodrigues Jr</p>
       </footer>
     </div>
   )

@@ -42,7 +42,7 @@ export default function SuspectCard({
           className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-typewriter flex-shrink-0"
           style={{
             backgroundColor: isSelected ? '#c9a84c' : '#1a1a1a',
-            color: isSelected ? '#0a0a0a' : '#8a8070',
+            color: isSelected ? '#0a0a0a' : '#b8b0a0',
             border: isSelected ? 'none' : '1px solid #333',
           }}
         >

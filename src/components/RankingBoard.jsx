@@ -14,7 +14,7 @@ export default function RankingBoard({
     if (rank === 1) return { color: '#FFD700', bg: '#FFD70011', border: '#FFD70044', icon: '🥇' }
     if (rank === 2) return { color: '#C0C0C0', bg: '#C0C0C011', border: '#C0C0C044', icon: '🥈' }
     if (rank === 3) return { color: '#CD7F32', bg: '#CD7F3211', border: '#CD7F3244', icon: '🥉' }
-    return { color: '#8a8070', bg: '', border: '#333', icon: '' }
+    return { color: '#b8b0a0', bg: '', border: '#333', icon: '' }
   }
 
   return (
@@ -64,7 +64,7 @@ export default function RankingBoard({
                 <div className="flex items-center gap-1.5">
                   <span
                     className="font-typewriter text-sm truncate"
-                    style={{ color: isCurrent ? '#c9a84c' : '#e8e0d0' }}
+                    style={{ color: isCurrent ? '#c9a84c' : '#f0ece3' }}
                   >
                     {entry.playerName}
                   </span>
@@ -80,7 +80,7 @@ export default function RankingBoard({
 
             {/* Cases resolved */}
             <div className="w-16 text-center">
-              <span className="font-typewriter text-sm" style={{ color: '#e8e0d0' }}>
+              <span className="font-typewriter text-sm" style={{ color: '#f0ece3' }}>
                 {entry.casesResolved}
               </span>
             </div>

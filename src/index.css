@@ -6,12 +6,26 @@
 
 @layer base {
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 17px; }  /* Larger base for readability */
   body {
     background: #0a0a0a;
-    color: #e8e0d0;
+    color: #f0ece3;           /* Higher contrast: warm off-white */
     font-family: 'Crimson Pro', serif;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Links — always visible and high contrast */
+  a { color: #c9a84c; }
+  a:hover { color: #e8c96a; }
+  /* Form inputs — larger text, better contrast */
+  input, textarea, select {
+    font-size: 1rem !important;
+    color: #f0ece3 !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #6a6560 !important;
   }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: #111; }

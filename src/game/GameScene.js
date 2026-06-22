@@ -44,7 +44,7 @@ export default class GameScene extends Phaser.Scene {
     const descText = this.add.text(cardX, cardY, this.caseData.crimeSceneDescription || 'Local do crime. Evidências espalhadas.', {
       fontFamily: '"Crimson Pro", serif',
       fontSize: '14px',
-      color: '#e8e0d0',
+      color: '#f0ece3',
       align: 'center',
       wordWrap: { width: width - 100 },
     }).setOrigin(0.5)
@@ -142,7 +142,7 @@ export default class GameScene extends Phaser.Scene {
     const txt = this.add.text(x, y + 8, text, {
       fontFamily: '"Crimson Pro", serif',
       fontSize: '11px',
-      color: '#e8e0d0',
+      color: '#f0ece3',
       wordWrap: { width: w - 16 },
       align: 'center',
     }).setOrigin(0.5)

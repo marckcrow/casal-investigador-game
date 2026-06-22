@@ -69,7 +69,7 @@ export default function ClueCard({
         {/* Title */}
         <h4
           className="font-typewriter text-sm mb-1 leading-tight"
-          style={{ color: isLocked ? '#555' : '#e8e0d0' }}
+          style={{ color: isLocked ? '#6a6560' : '#f0ece3' }}
         >
           {isLocked ? '???' : clue.title}
         </h4>

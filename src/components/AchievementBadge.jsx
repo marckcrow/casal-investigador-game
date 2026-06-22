@@ -38,7 +38,7 @@ export default function AchievementBadge({
           <div className="flex items-center gap-2 mb-0.5">
             <h4
               className="font-typewriter text-sm truncate"
-              style={{ color: isLocked ? '#555' : '#e8e0d0' }}
+              style={{ color: isLocked ? '#555' : '#f0ece3' }}
             >
               {achievement.name}
             </h4>

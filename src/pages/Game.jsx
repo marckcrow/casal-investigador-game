@@ -389,15 +389,27 @@ export default function Game() {
 
               <div>
                 <div className="text-gold font-typewriter text-xs mb-2">OS {caseData.suspects.length} SUSPETOS</div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {caseData.suspects.map((s, i) => (
-                    <div key={i} className="bg-noir border border-gray-700 rounded px-3 py-2 text-sm text-paper flex items-center gap-2">
+                    <button
+                      key={i}
+                      onClick={() => {
+                        // Navigate directly to suspect analysis step
+                        setSelectedSuspect(s.name)
+                        nextStep('suspects')
+                      }}
+                      className={`bg-noir border rounded px-3 py-2 text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                        selectedChar?.id === 'criminal' && i === criminalIdx
+                          ? 'border-crimson/50 hover:border-crimson hover:bg-crimson/5'
+                          : 'border-gray-700 hover:border-gray-500 hover:bg-gray-800/30'
+                      }`}
+                    >
                       <span className="text-paperDim text-xs">{i + 1}.</span>
-                      {s.name}
+                      <span className="text-paper">{s.name}</span>
                       {selectedChar?.id === 'criminal' && i === criminalIdx && (
                         <span className="ml-auto text-crimson text-xs font-typewriter">VOCÊ</span>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
                 {selectedChar?.id === 'criminal' && (
